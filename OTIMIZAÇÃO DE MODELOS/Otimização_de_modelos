@@ -1,0 +1,49 @@
+# Importar bibliotecas necessárias
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Carregar conjunto de dados (exemplo: Iris dataset)
+from sklearn.datasets import load_iris
+data = load_iris()
+X = data.data
+y = data.target
+
+# Dividir o conjunto de dados em treinamento e teste
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Normalizar os dados
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Definir o modelo de regressão logística com regularização
+model = LogisticRegression()
+
+# Definir os parâmetros de grid search para otimização de hiperparâmetros
+param_grid = {
+    'C': [0.01, 0.1, 1, 10, 100],
+    'penalty': ['l1', 'l2',],  # Regularização L1 e L2
+    'solver': ['liblinear']  # 'liblinear' é compatível com L1 e L2
+}
+
+# Grid search com validação cruzada
+grid_search = GridSearchCV(model, param_grid, cv=5, scoring='accuracy')
+grid_search.fit(X_train, y_train)
+
+# Melhor modelo
+best_model = grid_search.best_estimator_
+
+# Avaliar o modelo no conjunto de teste
+y_pred = best_model.predict(X_test)
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+
+# Imprimir os melhores hiperparâmetros
+print("Melhores hiperparâmetros:")
+print(grid_search.best_params_)
